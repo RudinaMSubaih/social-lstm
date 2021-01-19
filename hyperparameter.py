@@ -1,3 +1,6 @@
+'''
+Python script for random best parameter selection for a model
+'''
 import os
 import argparse
 import time

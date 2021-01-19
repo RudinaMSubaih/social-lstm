@@ -1,3 +1,6 @@
+'''
+Python script for training Social LSTM model
+'''
 import torch
 import numpy as np
 from torch.autograd import Variable

@@ -1,3 +1,6 @@
+'''
+Python script for externally evaluate a trained model by getting validation error
+'''
 import os
 import pickle
 import argparse

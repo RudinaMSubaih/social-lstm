@@ -1,3 +1,6 @@
+'''
+Python script for visualizing predicted trajectories during train/test/validation sessions
+'''
 import numpy as np
 import torch
 from torch.autograd import Variable

@@ -1,3 +1,6 @@
+'''
+Python script for model testing and getting output txt file for submission
+'''
 import os
 import pickle
 import os

@@ -1,3 +1,6 @@
+'''
+Python file includes Occupancy LSTM model definition
+'''
 import torch
 import torch.nn as nn
 import numpy as np

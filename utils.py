@@ -1,3 +1,6 @@
+'''
+Python script for handling input train/test/validation data and batching it (grouping it)
+'''
 import os
 import pickle
 import numpy as np

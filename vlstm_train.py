@@ -1,3 +1,6 @@
+'''
+Python script for training Vanilla LSTM model
+'''
 import torch
 import numpy as np
 from torch.autograd import Variable
