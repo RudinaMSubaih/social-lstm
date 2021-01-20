@@ -11,14 +11,15 @@ def getParserArgs():
     parser = argparse.ArgumentParser(description='Plot trajectory')
     parser.add_argument("-p", "--path", default="./", help='give the path of source file')
     parser.add_argument("-f", "--fps", default="25", type=float, help='give the frame rate of data')
+    parser.add_argument("-t", "--type", default="cross", type=str, help='Type of the data: pub, cross')
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
     args = getParserArgs()
     path = args.path
-    print(path)
     fps = args.fps
+    type = args.type
     figname = "rho_v_%s_traj" % (os.path.basename(os.path.splitext(path)[0]))
 
     plt.rc('xtick', labelsize=25)
@@ -27,11 +28,14 @@ if __name__ == '__main__':
     plt.rc('pdf', fonttype=42)
     fig = plt.figure(figsize=(16, 16), dpi=100)
 
-
-    data=loadtxt(path,usecols = (0,1,2,3))
-    plt.plot(data[:,2],data[:,3])
-    #plt.axvline(x=-2.5,linestyle="-",linewidth=1,color="r")
-
+    if type == "pub":
+        data=loadtxt(path,usecols = (0,1,2,3))
+        plt.plot(data[:,2],data[:,3])
+        #plt.axvline(x=-2.5,linestyle="-",linewidth=1,color="r")
+    else:
+        data = loadtxt(path, usecols=(0, 1, 2, 3, 4))
+        plt.plot(data[:, 2], data[:, 3])
+        # plt.axvline(x=-2.5,linestyle="-",linewidth=1,color="r")
 
     plt.xlabel("x [$m$]", size=25)
     plt.ylabel("y [$m$]", size=25)
