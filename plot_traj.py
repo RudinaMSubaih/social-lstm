@@ -28,13 +28,16 @@ if __name__ == '__main__':
     plt.rc('pdf', fonttype=42)
     fig = plt.figure(figsize=(16, 16), dpi=100)
 
+    '''
+    Because the organisation of data in the files is different: public data (fr,pedID,x,y), crossing data (pedID,fr,x,y,z)
+    '''
     if type == "pub":
         data=loadtxt(path,usecols = (0,1,2,3))
-        plt.plot(data[:,2],data[:,3])
+        plt.plot(data[:,2],data[:,3], 'bo')
         #plt.axvline(x=-2.5,linestyle="-",linewidth=1,color="r")
     else:
         data = loadtxt(path, usecols=(0, 1, 2, 3, 4))
-        plt.plot(data[:, 2], data[:, 3])
+        plt.plot(data[:, 2], data[:, 3], 'bo')
         # plt.axvline(x=-2.5,linestyle="-",linewidth=1,color="r")
 
     plt.xlabel("x [$m$]", size=25)
