@@ -1,12 +1,11 @@
-'''
+"""
 Draw the full trajectory (x,y) for each pedestrian at all the time frames
 @Rudina Subaih
-'''
-from numpy import *
-import numpy as np
-import os, sys, glob, math
+"""
 import argparse
+
 import matplotlib.pyplot as plt
+from numpy import *
 
 
 def getParserArgs():

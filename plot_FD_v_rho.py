@@ -1,12 +1,12 @@
-'''
+"""
 Draw the individual rho_vel relationship
 @Rudina Subaih
-'''
-from numpy import *
-import numpy as np
-import os, sys, glob, math
+"""
 import argparse
+import os
+
 import matplotlib.pyplot as plt
+from numpy import *
 
 
 def getParserArgs():
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     plt.rc('pdf', fonttype=42)
     fig = plt.figure(figsize=(16, 16), dpi=100)
 
-    data = loadtxt(path, usecols=(0, 1,2,3,4,5,6))
+    data = loadtxt(path, usecols=(0, 1, 2, 3, 4, 5, 6))
     plt.plot(data[:, 5], data[:, 6], 'bo')
 
     plt.xlabel("density [$m^{-2}$]", size=25)

@@ -1,18 +1,22 @@
 # Social LSTM implementation in PyTorch
 
 ## Project details
+
 **Semester project of Master of Computer Science in EPFL**  
 **Student name** : Baran Nama  
 **Advisor:** Alexandre Alahi  
-**Presentation** : https://drive.google.com/file/d/1biC23s1tbsyDETKKBW8PFXWYyyhNEAuI/view?usp=sharing  
+**Presentation** : https://drive.google.com/file/d/1biC23s1tbsyDETKKBW8PFXWYyyhNEAuI/view?usp=sharing
 
 ## Implementation details
+
 **Baseline implementation**: https://github.com/vvanirudh/social-lstm-pytorch  
 **Paper**: http://cvgl.stanford.edu/papers/CVPR16_Social_LSTM.pdf  
-**Detailed info about challange and datasets**: https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge
-**Made improvements:** Please see attached presentation  
+**Detailed info about challange and
+datasets**: https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge
+**Made improvements:** Please see attached presentation
 
 ## Documentation
+
 - **generator.py** : Python script for generating artifical datasets
 - **helper.py**: Python script includes various helper methods
 - **hyperparameter.py**: Pyton script for random best parameter selection for a model
@@ -29,12 +33,14 @@
 - **vlstm_train**: Python script for training Vanilla LSTM model
 
 ## How to deploy
-1. Fork the repository 
-2.  Start train a model >>> **python train/olstm_train/vlstm.train.py - -[Parameter set]**
-3. If necesarry file structure is not exist (which is the initial situation), train script will run make_directories.sh and this command will automatically create file structure
+
+1. Fork the repository
+2. Start train a model >>> **python train/olstm_train/vlstm.train.py - -[Parameter set]**
+3. If necesarry file structure is not exist (which is the initial situation), train script will run make_directories.sh
+   and this command will automatically create file structure
 4. Enjoy!
 
-## Results  
+## Results
 
 | Model name | Avarage error | Final error | Mean error |
 | :---: | :---: | :---: | :---: |
