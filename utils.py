@@ -3,18 +3,16 @@ Python script for handling input train/test/validation data and batching it (gro
 """
 import pickle
 import random
-
 import pandas as pd
-
 from helper import *
 
 
-class DataLoader():
+class DataLoader:
 
     def __init__(self, f_prefix, batch_size=5, seq_length=20, num_of_validation=0, forcePreProcess=False, infer=False,
                  generate=False):
         """
-        Initialiser function for the DataLoader class
+        initializer (constructor) function for the DataLoader class
         params:
         batch_size : Size of the mini-batch
         seq_length : Sequence length to be considered
@@ -309,12 +307,12 @@ class DataLoader():
         f.close()
 
     def load_preprocessed(self, data_file, validation_set=False):
-        '''
+        """
         Function to load the pre-processed data into the DataLoader object
         params:
         data_file : the path to the pickled data file
         validation_set : flag for validation dataset
-        '''
+        """
         # Load data from the pickled file
         if (validation_set):
             print("Loading validaton datasets: ", data_file)
@@ -376,9 +374,10 @@ class DataLoader():
         # self.valid_num_batches = self.valid_num_batches * 2
 
     def next_batch(self):
-        '''
+        """
         Function to get the next batch of points
-        '''
+        :return:
+        """
         # Source data
         x_batch = []
         # Target data
@@ -433,9 +432,10 @@ class DataLoader():
         return x_batch, y_batch, d, numPedsList_batch, PedsList_batch, target_ids
 
     def next_valid_batch(self):
-        '''
+        """
         Function to get the next Validation batch of points
-        '''
+        :return:
+        """
         # Source data
         x_batch = []
         # Target data
@@ -490,10 +490,11 @@ class DataLoader():
         return x_batch, y_batch, d, numPedsList_batch, PedsList_batch, target_ids
 
     def tick_batch_pointer(self, valid=False):
-        '''
+        """
         Advance the dataset pointer
-        '''
-
+        :param valid:
+        :return:
+        """
         if not valid:
 
             # Go to the next dataset
@@ -517,9 +518,11 @@ class DataLoader():
             print("now processing: %s" % self.get_file_name(pointer_type='valid'))
 
     def reset_batch_pointer(self, valid=False):
-        '''
+        """
         Reset all pointers
-        '''
+        :param valid:
+        :return:
+        """
         if not valid:
             # Go to the first frame of the first dataset
             self.dataset_pointer = 0
@@ -529,7 +532,12 @@ class DataLoader():
             self.valid_frame_pointer = 0
 
     def switch_to_dataset_type(self, train=False, load_data=True):
-        # function for switching between train and validation datasets during training session
+        """
+        Function for switching between train and validation datasets during training session
+        :param train:
+        :param load_data:
+        :return:
+        """
         print('--------------------------------------------------------------------------')
         if not train:  # if train mode, switch to validation mode
             if self.additional_validation:
@@ -554,10 +562,14 @@ class DataLoader():
                 self.reset_batch_pointer(valid=True)
 
     def convert_proper_array(self, x_seq, num_pedlist, pedlist):
-        # converter function to appropriate format. Instead of direcly use ped ids, we are mapping ped ids to
-        # array indices using a lookup table for each sequence -> speed
-        # output: seq_lenght (real sequence lenght+1)*max_ped_id+1 (biggest id number in the sequence)*2 (x,y)
-
+        """
+        Converter function to appropriate format. Instead of directly use ped ids, we are mapping ped ids to array
+        indices using a lookup table for each sequence -> speed
+        :param x_seq:
+        :param num_pedlist:
+        :param pedlist:
+        :return: seq_lenght (real sequence lenght+1)*max_ped_id+1 (biggest id number in the sequence)*2 (x,y)
+        """
         # get unique ids from sequence
         unique_ids = pd.unique(np.concatenate(pedlist).ravel().tolist()).astype(int)
         # create a lookup table which maps ped ids -> array indices
@@ -575,12 +587,23 @@ class DataLoader():
         return return_arr, lookup_table
 
     def add_element_to_dict(self, dict, key, value):
-        # helper function to add a element to dictionary
+        """
+        Helper function to add a element to dictionary
+        :param dict:
+        :param key:
+        :param value:
+        :return:
+        """
         dict.setdefault(key, [])
         dict[key].append(value)
 
     def get_dataset_path(self, base_path, f_prefix):
-        # get all datasets from given set of directories
+        """
+        Get all datasets from given set of directories
+        :param base_path:
+        :param f_prefix:
+        :return:
+        """
         dataset = []
         dir_names = unique_list(self.get_all_directory_namelist())
         for dir_ in dir_names:
@@ -590,7 +613,12 @@ class DataLoader():
         return dataset
 
     def get_file_name(self, offset=0, pointer_type='train'):
-        # return file name of processing or pointing by dataset pointer
+        """
+        Return file name of processing or pointing by dataset pointer
+        :param offset:
+        :param pointer_type:
+        :return:
+        """
         if pointer_type == 'train':
             return self.data_dirs[self.dataset_pointer + offset].split('/')[-1]
 
@@ -598,7 +626,10 @@ class DataLoader():
             return self.data_dirs[self.valid_dataset_pointer + offset].split('/')[-1]
 
     def create_folder_file_dict(self):
-        # create a helper dictionary folder name:file name
+        """
+        Create a helper dictionary folder name:file name
+        :return:
+        """
         self.folder_file_dict = {}
         for dir_ in self.base_data_dirs:
             folder_name = dir_.split('/')[-2]
@@ -606,36 +637,68 @@ class DataLoader():
             self.add_element_to_dict(self.folder_file_dict, folder_name, file_name)
 
     def get_directory_name(self, offset=0):
-        # return folder name of file of processing or pointing by dataset pointer
+        """
+        Return folder name of file of processing or pointing by dataset pointer
+        :param offset:
+        :return:
+        """
         folder_name = self.data_dirs[self.dataset_pointer + offset].split('/')[-2]
         return folder_name
 
     def get_directory_name_with_pointer(self, pointer_index):
-        # get directory name using pointer index
+        """
+        Get directory name using pointer index
+        :param pointer_index:
+        :return:
+        """
         folder_name = self.data_dirs[pointer_index].split('/')[-2]
         return folder_name
 
     def get_all_directory_namelist(self):
-        # return all directory names in this collection of dataset
+        """
+        Return all directory names in this collection of dataset
+        :return:
+        """
         folder_list = [data_dir.split('/')[-2] for data_dir in (self.base_data_dirs)]
         return folder_list
 
     def get_file_path(self, base, prefix, model_name='', offset=0):
-        # return file path of file of processing or pointing by dataset pointer
+        """
+        Return file path of file of processing or pointing by dataset pointer
+        :param base:
+        :param prefix:
+        :param model_name:
+        :param offset:
+        :return:
+        """
         folder_name = self.data_dirs[self.dataset_pointer + offset].split('/')[-2]
         base_folder_name = os.path.join(prefix, base, model_name, folder_name)
         return base_folder_name
 
     def get_base_file_name(self, key):
-        # return file name using folder- file dictionary
+        """
+        Return file name using folder- file dictionary
+        :param key:
+        :return:
+        """
         return self.folder_file_dict[key]
 
     def get_len_of_dataset(self):
-        # return the number of dataset in the mode
+        """
+        Return the number of dataset in the mode
+        :return:
+        """
         return len(self.data)
 
     def clean_test_data(self, x_seq, target_id, obs_lenght, predicted_lenght):
-        # remove (pedid, x , y) array if x or y is nan for each frame in observed part (for test mode)
+        """
+        Remove (pedid, x , y) array if x or y is nan for each frame in observed part (for test mode)
+        :param x_seq:
+        :param target_id:
+        :param obs_lenght:
+        :param predicted_lenght:
+        :return:
+        """
         for frame_num in range(obs_lenght):
             nan_elements_index = np.where(np.isnan(x_seq[frame_num][:, 2]))
 
@@ -655,13 +718,28 @@ class DataLoader():
                 pass
 
     def clean_ped_list(self, x_seq, pedlist_seq, target_id, obs_lenght, predicted_lenght):
-        # remove peds from pedlist after test cleaning
+        """
+        Remove peds from pedlist after test cleaning
+        :param x_seq:
+        :param pedlist_seq:
+        :param target_id:
+        :param obs_lenght:
+        :param predicted_lenght:
+        :return:
+        """
         target_id_arr = [target_id]
         for frame_num in range(obs_lenght + predicted_lenght):
             pedlist_seq[frame_num] = x_seq[frame_num][:, 0]
 
     def write_to_file(self, data, base, f_prefix, model_name):
-        # write all files as txt format
+        """
+        Write all files as .txt format
+        :param data:
+        :param base:
+        :param f_prefix:
+        :param model_name:
+        :return:
+        """
         self.reset_batch_pointer()
         for file in range(self.numDatasets):
             path = self.get_file_path(f_prefix, base, model_name, file)
@@ -669,13 +747,24 @@ class DataLoader():
             self.write_dataset(data[file], file_name, path)
 
     def write_dataset(self, dataset_seq, file_name, path):
-        # write a file in txt format
+        """
+        Write a file in txt format
+        :param dataset_seq:
+        :param file_name:
+        :param path:
+        :return:
+        """
         print("Writing to file  path: %s, file_name: %s" % (path, file_name))
         out = np.concatenate(dataset_seq, axis=0)
         np.savetxt(os.path.join(path, file_name), out, fmt="%1d %1.1f %.3f %.3f", newline='\n')
 
     def write_to_plot_file(self, data, path):
-        # write plot file for further visualization in pkl format
+        """
+        Write plot file for further visualization in .pkl format
+        :param data:
+        :param path:
+        :return:
+        """
         self.reset_batch_pointer()
         for file in range(self.numDatasets):
             file_name = self.get_file_name(file)
@@ -684,21 +773,33 @@ class DataLoader():
             with open(os.path.join(path, file_name), 'wb') as f:
                 pickle.dump(data[file], f)
 
-    def get_frame_sequence(self, frame_lenght):
-        # begin and end of predicted fram numbers in this seq.
-        begin_fr = (self.frame_pointer - frame_lenght)
+    def get_frame_sequence(self, frame_length):
+        """
+        Begin and end of predicted frame numbers in this sequence
+        :param frame_length:
+        :return:
+        """
+        begin_fr = (self.frame_pointer - frame_length)
         end_fr = self.frame_pointer
         frame_number = self.orig_data[self.dataset_pointer][begin_fr:end_fr, 0].transpose()
         return frame_number
 
-    def get_id_sequence(self, frame_lenght):
-        # begin and end of predicted fram numbers in this seq.
-        begin_fr = (self.frame_pointer - frame_lenght)
+    def get_id_sequence(self, frame_length):
+        """
+        Begin and end of predicted frame numbers in this sequence
+        :param frame_length:
+        :return:
+        """
+        begin_fr = (self.frame_pointer - frame_length)
         end_fr = self.frame_pointer
         id_number = self.orig_data[self.dataset_pointer][begin_fr:end_fr, 1].transpose()
         id_number = [int(i) for i in id_number]
         return id_number
 
     def get_dataset_dimension(self, file_name):
-        # return dataset dimension using dataset file name
+        """
+        Return dataset dimension using dataset file name
+        :param file_name:
+        :return:
+        """
         return self.dataset_dimensions[file_name]
