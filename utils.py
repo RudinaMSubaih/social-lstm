@@ -45,6 +45,7 @@ class DataLoader:
                               # '/data/train/stanford/hyang_5.txt','/data/train/stanford/hyang_6.txt','/data/train/stanford/hyang_9.txt','/data/train/stanford/nexus_0.txt','/data/train/stanford/nexus_1.txt','/data/train/stanford/nexus_2.txt','/data/train/stanford/nexus_3.txt','/data/train/stanford/nexus_4.txt','/data/train/stanford/nexus_7.txt','/data/train/stanford/nexus_8.txt','/data/train/stanford/nexus_9.txt'
                               ]
         # dimensions of each file set
+        # TODO: what is this for? and you have for any new file data to add it here
         self.dataset_dimensions = {'biwi': [720, 576], 'crowds': [720, 576], 'stanford': [595, 326], 'mot': [768, 576]}
 
         # List of data directories where raw data resides
@@ -73,7 +74,7 @@ class DataLoader:
         else:
             self.additional_validation = False
 
-        # check validation dataset availibility and clip the reuqested number if it is bigger than available
+        # check validation dataset availability and clip the requested number if it is bigger than available
         # validation dataset
         if self.additional_validation:
             if len(self.validation_dataset) == 0:

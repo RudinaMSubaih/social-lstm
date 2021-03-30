@@ -12,12 +12,13 @@ from helper import *
 from utils import DataLoader
 
 
-def main():
+def get_parser_args():
     parser = argparse.ArgumentParser()
-    # RNN size parameter (dimension of the output/hidden state)
+    # RNN size parameter (dimension of the input)
     parser.add_argument('--input_size', type=int, default=2)
+    # RNN size parameter (dimension of the output state)
     parser.add_argument('--output_size', type=int, default=5)
-    # RNN size parameter (dimension of the output/hidden state)
+    # RNN size parameter (dimension of the hidden state)
     parser.add_argument('--rnn_size', type=int, default=128,
                         help='size of RNN hidden state')
     # Size of each batch parameter
@@ -26,12 +27,13 @@ def main():
     # Length of sequence to be considered parameter
     parser.add_argument('--seq_length', type=int, default=20,
                         help='RNN sequence length')
+    # Length of the prediction result
     parser.add_argument('--pred_length', type=int, default=12,
                         help='prediction length')
     # Number of epochs parameter
     parser.add_argument('--num_epochs', type=int, default=50,
                         help='number of epochs')
-    # Frequency at which the model should be saved parameter
+    # Frequency at which the model should be saved
     parser.add_argument('--save_every', type=int, default=400,
                         help='save frequency')
     # TODO: (resolve) Clipping gradients for now. No idea whether we should
@@ -54,7 +56,6 @@ def main():
     # Maximum number of pedestrians to be considered
     parser.add_argument('--maxNumPeds', type=int, default=27,
                         help='Maximum Number of Pedestrians')
-
     # Lambda regularization parameter (L2)
     parser.add_argument('--lambda_param', type=float, default=0.0005,
                         help='L2 regularization parameter')
@@ -62,6 +63,7 @@ def main():
     parser.add_argument('--use_cuda', action="store_true", default=False,
                         help='Use GPU or not')
 
+    # GRU: Gated Recurrent Unit
     parser.add_argument('--gru', action="store_true", default=False,
                         help='True : GRU cell, False: LSTM cell')
 
@@ -79,7 +81,7 @@ def main():
 
     args = parser.parse_args()
 
-    train(args)
+    return args
 
 
 def train(args):
@@ -89,17 +91,23 @@ def train(args):
 
     prefix = ''
     f_prefix = '.'
+
+    # TODO: you can delete is. It is not that important to me.
     if args.drive is True:
         prefix = 'drive/semester_project/social_lstm_final/'
         f_prefix = 'drive/semester_project/social_lstm_final'
 
+    # Create "log" directory if the directories structure in the project don't contain "log" directory.
     if not os.path.isdir("log/"):
         print("Directory creation script is running...")
+        # Run the command described by args ([f_prefix + '/make_directories.sh']). Wait for command to complete,
+        # then return the return code attribute.
         subprocess.call([f_prefix + '/make_directories.sh'])
 
+    # TODO: why they clip it? what is the benefit?
     args.freq_validation = np.clip(args.freq_validation, 0, args.num_epochs)
     validation_epoch_list = list(range(args.freq_validation, args.num_epochs + 1, args.freq_validation))
-    validation_epoch_list[-1] -= 1
+    validation_epoch_list[-1] -= 1  # subtract the last element value in the list by 1
 
     # Create the data loader object. This object would preprocess the data in terms of
     # batches each of size args.batch_size, of length args.seq_length
@@ -493,6 +501,8 @@ def train(args):
 
 if __name__ == '__main__':
     start = timeit.default_timer()
-    main()
+
+    train(get_parser_args())
+
     stop = timeit.default_timer()
     print('Time: ', stop - start)
