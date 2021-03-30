@@ -15,8 +15,11 @@ from olstm_model import OLSTMModel
 from vlstm_model import VLSTMModel
 
 
-# one time set dictionary for a exist key
 class WriteOnceDict(dict):
+    """
+    One time set dictionary for a exist key
+    """
+
     def __setitem__(self, key, value):
         if not key in self:
             super(WriteOnceDict, self).__setitem__(key, value)
@@ -24,7 +27,11 @@ class WriteOnceDict(dict):
 
 # (1 = social lstm, 2 = obstacle lstm, 3 = vanilla lstm)
 def get_method_name(index):
-    # return method name given index
+    """
+    Return method name given index
+    :param index:
+    :return:
+    """
     return {
         1: 'SOCIALLSTM',
         2: 'OBSTACLELSTM',
@@ -33,7 +40,13 @@ def get_method_name(index):
 
 
 def get_model(index, arguments, infer=False):
-    # return a model given index and arguments
+    """
+    Return a model given index and arguments
+    :param index:
+    :param arguments:
+    :param infer:
+    :return:
+    """
     if index == 1:
         return SocialModel(arguments, infer)
     elif index == 2:
@@ -47,8 +60,8 @@ def get_model(index, arguments, infer=False):
 def getCoef(outputs):
     """
     Extracts the mean, standard deviation and correlation
-    params:
-    outputs : Output of the SRNN model
+    :param outputs: Output of the SRNN model
+    :return:
     """
     mux, muy, sx, sy, corr = outputs[:, :, 0], outputs[:, :, 1], outputs[:, :, 2], outputs[:, :, 3], outputs[:, :, 4]
 
@@ -60,20 +73,18 @@ def getCoef(outputs):
 
 def sample_gaussian_2d(mux, muy, sx, sy, corr, nodesPresent, look_up):
     """
-    Parameters
-    ==========
-
     mux, muy, sx, sy, corr : a tensor of shape 1 x numNodes
     Contains x-means, y-means, x-stds, y-stds and correlation
-
-    nodesPresent : a list of nodeIDs present in the frame
-    look_up : lookup table for determining which ped is in which array index
-
-    Returns
-    =======
-
-    next_x, next_y : a tensor of shape numNodes
-    Contains sampled values from the 2D gaussian
+    :param mux:
+    :param muy:
+    :param sx:
+    :param sy:
+    :param corr: a tensor of shape 1 x numNodes
+    :param nodesPresent: a list of nodeIDs present in the frame
+    :param look_up: lookup table for determining which ped is in which array index
+    :return:
+        next_x, next_y : a tensor of shape numNodes
+        Contains sampled values from the 2D gaussian
     """
     o_mux, o_muy, o_sx, o_sy, o_corr = mux[0, :], muy[0, :], sx[0, :], sy[0, :], corr[0, :]
 
@@ -97,27 +108,19 @@ def sample_gaussian_2d(mux, muy, sx, sy, corr, nodesPresent, look_up):
     return next_x, next_y
 
 
+# Average displacement error
 def get_mean_error(ret_nodes, nodes, assumedNodesPresent, trueNodesPresent, using_cuda, look_up):
     """
-    Parameters
-    ==========
 
-    ret_nodes : A tensor of shape pred_length x numNodes x 2
-    Contains the predicted positions for the nodes
-
-    nodes : A tensor of shape pred_length x numNodes x 2
-    Contains the true positions for the nodes
-
-    nodesPresent lists: A list of lists, of size pred_length
-    Each list contains the nodeIDs of the nodes present at that time-step
-
-    look_up : lookup table for determining which ped is in which array index
-
-    Returns
-    =======
-
-    Error : Mean euclidean distance between predicted trajectory and the true trajectory
+    :param ret_nodes: A tensor of shape pred_length x numNodes x 2. Contains the predicted positions for the nodes
+    :param nodes: A tensor of shape pred_length x numNodes x 2. Contains the true positions for the nodes
+    :param assumedNodesPresent:
+    :param trueNodesPresent: A list of lists, of size pred_length. Each list contains the nodeIDs of the nodes present at that time-step
+    :param using_cuda:
+    :param look_up: lookup table for determining which ped is in which array index
+    :return: Error; Mean euclidean distance between predicted trajectory and the true trajectory
     """
+
     pred_length = ret_nodes.size()[0]
     error = torch.zeros(pred_length)
     if using_cuda:
@@ -146,28 +149,24 @@ def get_mean_error(ret_nodes, nodes, assumedNodesPresent, trueNodesPresent, usin
     return torch.mean(error)
 
 
+# Final displacement error
 def get_final_error(ret_nodes, nodes, assumedNodesPresent, trueNodesPresent, look_up):
     """
-    Parameters
-    ==========
-
     ret_nodes : A tensor of shape pred_length x numNodes x 2
     Contains the predicted positions for the nodes
-
-    nodes : A tensor of shape pred_length x numNodes x 2
-    Contains the true positions for the nodes
 
     nodesPresent lists: A list of lists, of size pred_length
     Each list contains the nodeIDs of the nodes present at that time-step
 
-    look_up : lookup table for determining which ped is in which array index
 
-
-    Returns
-    =======
-
-    Error : Mean final euclidean distance between predicted trajectory and the true trajectory
+    :param ret_nodes: A tensor of shape pred_length x numNodes x 2. Contains the predicted positions for the nodes
+    :param nodes: A tensor of shape pred_length x numNodes x 2. Contains the true positions for the nodes
+    :param assumedNodesPresent:
+    :param trueNodesPresent:
+    :param look_up: lookup table for determining which ped is in which array index
+    :return: Error; Mean final euclidean distance between predicted trajectory and the true trajectory
     """
+
     pred_length = ret_nodes.size()[0]
     error = 0
     counter = 0
@@ -197,13 +196,14 @@ def get_final_error(ret_nodes, nodes, assumedNodesPresent, trueNodesPresent, loo
 def Gaussian2DLikelihoodInference(outputs, targets, nodesPresent, pred_length, look_up):
     """
     Computes the likelihood of predicted locations under a bivariate Gaussian distribution at test time
-
-    Parameters:
-
-    outputs: Torch variable containing tensor of shape seq_length x numNodes x 1 x output_size
-    targets: Torch variable containing tensor of shape seq_length x numNodes x 1 x input_size
-    nodesPresent : A list of lists, of size seq_length. Each list contains the nodeIDs that are present in the frame
+    :param outputs: Torch variable containing tensor of shape seq_length x numNodes x 1 x output_size
+    :param targets: Torch variable containing tensor of shape seq_length x numNodes x 1 x input_size
+    :param nodesPresent: A list of lists, of size seq_length. Each list contains the nodeIDs that are present in the frame
+    :param pred_length:
+    :param look_up:
+    :return:
     """
+
     seq_length = outputs.size()[0]
     obs_length = seq_length - pred_length
 
@@ -252,14 +252,14 @@ def Gaussian2DLikelihoodInference(outputs, targets, nodesPresent, pred_length, l
 
 def Gaussian2DLikelihood(outputs, targets, nodesPresent, look_up):
     """
-    params:
-    outputs : predicted locations
-    targets : true locations
     assumedNodesPresent : Nodes assumed to be present in each frame in the sequence
-    nodesPresent : True nodes present in each frame in the sequence
-    look_up : lookup table for determining which ped is in which array index
-
+    :param outputs: predicted locations
+    :param targets: true locations
+    :param nodesPresent: True nodes present in each frame in the sequence
+    :param look_up: lookup table for determining which ped is in which array index
+    :return:
     """
+
     seq_length = outputs.size()[0]
     # Extract mean, std devs and correlation
     mux, muy, sx, sy, corr = getCoef(outputs)
@@ -304,21 +304,35 @@ def Gaussian2DLikelihood(outputs, targets, nodesPresent, look_up):
         return loss
 
 
-##################### Data related methods ######################
+# All the following methods are: Data related methods #
 
 def remove_file_extention(file_name):
-    # remove file extension (.txt) given filename
+    """
+    Remove file extension (.txt) given filename
+    :param file_name:
+    :return:
+    """
     return file_name.split('.')[0]
 
 
 def add_file_extention(file_name, extention):
-    # add file extension (.txt) given filename
+    """
+    Add file extension (.txt) given filename
+    :param file_name:
+    :param extention:
+    :return:
+    """
 
     return file_name + '.' + extention
 
 
 def clear_folder(path):
-    # remove all files in the folder
+    """
+    Remove all files in the folder
+    :param path:
+    :return:
+    """
+
     if os.path.exists(path):
         shutil.rmtree(path)
         print("Folder succesfully removed: ", path)
@@ -327,7 +341,13 @@ def clear_folder(path):
 
 
 def delete_file(path, file_name_list):
-    # delete given file list
+    """
+    Delete given file list
+    :param path:
+    :param file_name_list:
+    :return:
+    """
+
     for file in file_name_list:
         file_path = os.path.join(path, file)
         try:
@@ -341,7 +361,11 @@ def delete_file(path, file_name_list):
 
 
 def get_all_file_names(path):
-    # return all file names given directory
+    """
+    Return all file names given directory
+    :param path:
+    :return:
+    """
     files = []
     for (dirpath, dirnames, filenames) in walk(path):
         files.extend(filenames)
@@ -350,7 +374,12 @@ def get_all_file_names(path):
 
 
 def create_directories(base_folder_path, folder_list):
-    # create folders using a folder list and path
+    """
+    Create folders using a folder list and path
+    :param base_folder_path:
+    :param folder_list:
+    :return:
+    """
     for folder_name in folder_list:
         directory = os.path.join(base_folder_path, folder_name)
         if not os.path.exists(directory):
@@ -358,7 +387,11 @@ def create_directories(base_folder_path, folder_list):
 
 
 def unique_list(l):
-    # get unique elements from list
+    """
+    Get unique elements from list
+    :param l:
+    :return:
+    """
     x = []
     for a in l:
         if a not in x:
@@ -367,14 +400,26 @@ def unique_list(l):
 
 
 def angle_between(p1, p2):
-    # return angle between two points
+    """
+    Return angle between two points
+    :param p1:
+    :param p2:
+    :return:
+    """
     ang1 = np.arctan2(*p1[::-1])
     ang2 = np.arctan2(*p2[::-1])
     return ((ang1 - ang2) % (2 * np.pi))
 
 
 def vectorize_seq(x_seq, PedsList_seq, lookup_seq):
-    # substract first frame value to all frames for a ped.Therefore, convert absolute pos. to relative pos.
+    """
+    Subtract first frame value to all frames for a ped. Therefore, convert absolute position to relative position
+    :param x_seq:
+    :param PedsList_seq:
+    :param lookup_seq:
+    :return:
+    """
+
     first_values_dict = WriteOnceDict()
     vectorized_x_seq = x_seq.clone()
     for ind, frame in enumerate(x_seq):
@@ -386,7 +431,15 @@ def vectorize_seq(x_seq, PedsList_seq, lookup_seq):
 
 
 def translate(x_seq, PedsList_seq, lookup_seq, value):
-    # translate al trajectories given x and y values
+    """
+    Translate al trajectories given x and y values
+    :param x_seq:
+    :param PedsList_seq:
+    :param lookup_seq:
+    :param value:
+    :return:
+    """
+
     vectorized_x_seq = x_seq.clone()
     for ind, frame in enumerate(x_seq):
         for ped in PedsList_seq[ind]:
@@ -396,7 +449,15 @@ def translate(x_seq, PedsList_seq, lookup_seq, value):
 
 
 def revert_seq(x_seq, PedsList_seq, lookup_seq, first_values_dict):
-    # convert velocity array to absolute position array
+    """
+    Convert velocity array to absolute position array
+    :param x_seq:
+    :param PedsList_seq:
+    :param lookup_seq:
+    :param first_values_dict:
+    :return:
+    """
+
     absolute_x_seq = x_seq.clone()
     for ind, frame in enumerate(x_seq):
         for ped in PedsList_seq[ind]:
@@ -407,10 +468,13 @@ def revert_seq(x_seq, PedsList_seq, lookup_seq, first_values_dict):
 
 def rotate(origin, point, angle):
     """
-        Rotate a point counterclockwise by a given angle around a given origin.
+    Rotate a point counterclockwise by a given angle around a given origin. The angle should be given in radians.
+    :param origin:
+    :param point:
+    :param angle:
+    :return:
+    """
 
-        The angle should be given in radians.
-        """
     ox, oy = origin
     px, py = point
 
@@ -421,7 +485,15 @@ def rotate(origin, point, angle):
 
 
 def time_lr_scheduler(optimizer, epoch, lr_decay=0.5, lr_decay_epoch=10):
-    """Decay learning rate by a factor of lr_decay every lr_decay_epoch epochs"""
+    """
+    Decay learning rate by a factor of lr_decay every lr_decay_epoch epochs
+    :param optimizer:
+    :param epoch:
+    :param lr_decay:
+    :param lr_decay_epoch:
+    :return:
+    """
+
     if epoch % lr_decay_epoch:
         return optimizer
 
@@ -435,14 +507,17 @@ def time_lr_scheduler(optimizer, epoch, lr_decay=0.5, lr_decay_epoch=10):
 def sample_validation_data(x_seq, Pedlist, grid, args, net, look_up, num_pedlist, dataloader):
     """
     The validation sample function
-    params:
-    x_seq: Input positions
-    Pedlist: Peds present in each frame
-    args: arguments
-    net: The model
-    num_pedlist : number of peds in each frame
-    look_up : lookup table for determining which ped is in which array index
+    :param x_seq: Input positions
+    :param Pedlist: Peds present in each frame
+    :param grid:
+    :param args: arguments
+    :param net: The model
+    :param look_up: lookup table for determining which ped is in which array index
+    :param num_pedlist: number of peds in each frame
+    :param dataloader:
+    :return:
     """
+
     # Number of peds in the sequence
     numx_seq = len(look_up)
 
@@ -494,14 +569,16 @@ def sample_validation_data(x_seq, Pedlist, grid, args, net, look_up, num_pedlist
 def sample_validation_data_vanilla(x_seq, Pedlist, args, net, look_up, num_pedlist, dataloader):
     """
     The validation sample function for vanilla method
-    params:
-    x_seq: Input positions
-    Pedlist: Peds present in each frame
-    args: arguments
-    net: The model
-    num_pedlist : number of peds in each frame
-    look_up : lookup table for determining which ped is in which array index
+    :param x_seq: Input positions
+    :param Pedlist: Peds present in each frame
+    :param args: arguments
+    :param net: The model
+    :param look_up: lookup table for determining which ped is in which array index
+    :param num_pedlist: number of peds in each frame
+    :param dataloader:
+    :return:
     """
+
     # Number of peds in the sequence
     numx_seq = len(look_up)
 
@@ -548,7 +625,15 @@ def sample_validation_data_vanilla(x_seq, Pedlist, args, net, look_up, num_pedli
 
 
 def rotate_traj_with_target_ped(x_seq, angle, PedsList_seq, lookup_seq):
-    # rotate sequence given angle
+    """
+    Rotate sequence given angle
+    :param x_seq:
+    :param angle:
+    :param PedsList_seq:
+    :param lookup_seq:
+    :return:
+    """
+
     origin = (0, 0)
     vectorized_x_seq = x_seq.clone()
     for ind, frame in enumerate(x_seq):
