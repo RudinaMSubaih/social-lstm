@@ -24,7 +24,7 @@ def get_parser_args():
     # Size of each batch parameter
     parser.add_argument('--batch_size', type=int, default=5,
                         help='minibatch size')
-    # Length of sequence to be considered parameter
+    # Length of sequence to be considered parameter. It is the number of observed frames plus of predicted frames
     parser.add_argument('--seq_length', type=int, default=20,
                         help='RNN sequence length')
     # Length of the prediction result
@@ -129,24 +129,25 @@ def train(args):
     log_file_curve = open(os.path.join(log_directory, method_name, model_name, 'log_curve.txt'), 'w+')
     log_file = open(os.path.join(log_directory, method_name, model_name, 'val.txt'), 'w+')
 
-    # model directory
+    # Model directory
     save_directory = os.path.join(prefix, 'model/')
 
-    # Save the arguments int the config file
+    # Save the arguments in the config file
     with open(os.path.join(save_directory, method_name, model_name, 'config.pkl'), 'wb') as f:
         pickle.dump(args, f)
 
-    # Path to store the checkpoint file
+    # Nested method to store the checkpoint file
     def checkpoint_path(x):
         return os.path.join(save_directory, method_name, model_name, save_tar_name + str(x) + '.tar')
 
-    # model creation
+    # Model creation
     net = VLSTMModel(args)
     if args.use_cuda:
         net = net.cuda()
 
-    # optimizer = torch.optim.RMSprop(net.parameters(), lr=args.learning_rate)
-    optimizer = torch.optim.Adagrad(net.parameters(), weight_decay=args.lambda_param)
+    # Optimizers. in the code Adagrad used, but in the paper they used RMSprop
+    optimizer = torch.optim.RMSprop(net.parameters(), lr=args.learning_rate)
+    # optimizer = torch.optim.Adagrad(net.parameters(), weight_decay=args.lambda_param)
     # optimizer = torch.optim.Adam(net.parameters(), weight_decay=args.lambda_param)
 
     learning_rate = args.learning_rate
@@ -179,7 +180,6 @@ def train(args):
 
             # Get batch data
             x, y, d, numPedsList, PedsList, target_ids = dataloader.next_batch()
-
             loss_batch = 0
 
             # For each sequence
@@ -195,7 +195,7 @@ def train(args):
 
                 # dense vector creation
                 x_seq, lookup_seq = dataloader.convert_proper_array(x_seq, numPedsList_seq, PedsList_seq)
-                target_id_values = x_seq[0][lookup_seq[target_id], 0:2]
+                # target_id_values = x_seq[0][lookup_seq[target_id], 0:2]
 
                 # vectorize trajectories in sequence
                 x_seq, _ = vectorize_seq(x_seq, PedsList_seq, lookup_seq)
@@ -367,7 +367,7 @@ def train(args):
                 x, y, d, numPedsList, PedsList, target_ids = dataloader.next_batch()
 
                 if dataset_pointer_ins is not dataloader.dataset_pointer:
-                    if dataloader.dataset_pointer is not 0:
+                    if dataloader.dataset_pointer != 0:
                         print('Finished prosessed file : ', dataloader.get_file_name(-1), ' Avarage error : ',
                               err_epoch / num_of_batch)
                         num_of_batch = 0
@@ -398,7 +398,8 @@ def train(args):
                     # will be used for error calculation
                     orig_x_seq = x_seq.clone()
 
-                    target_id_values = orig_x_seq[0][lookup_seq[target_id], 0:2]
+                    # TODO: I commented this line below. Check what is for
+                    # target_id_values = orig_x_seq[0][lookup_seq[target_id], 0:2]
 
                     # vectorize datapoints
                     x_seq, first_values_dict = vectorize_seq(x_seq, PedsList_seq, lookup_seq)

@@ -7,6 +7,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 
+# nn.Module: base class for all neural network modules
 class VLSTMModel(nn.Module):
 
     def __init__(self, args, infer=False):
@@ -16,12 +17,14 @@ class VLSTMModel(nn.Module):
         args: Training arguments
         infer: Training or test time (true if test time)
         """
+        # Your models should also subclass this class "nn.Module"
         super(VLSTMModel, self).__init__()
 
         self.args = args
         self.infer = infer
         self.use_cuda = args.use_cuda
 
+        # TODO: I think no need for this, because in line 41 we change the value to args.seq_length. Delete it
         if infer:
             # Test time
             self.seq_length = 1
@@ -38,10 +41,12 @@ class VLSTMModel(nn.Module):
         self.seq_length = args.seq_length
         self.gru = args.gru
 
-        # The LSTM cell
+        # The LSTM cell. Parameters: input_size, hidden_size, bias
+        # TODO: here in my case we have only one pedestrian. No need for embeddings.
         self.cell = nn.LSTMCell(self.embedding_size, self.rnn_size)
 
         if self.gru:
+            # Parameters: input_size, hidden_size, bias
             self.cell = nn.GRUCell(self.embedding_size, self.rnn_size)
 
         # Linear layer to embed the input position

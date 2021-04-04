@@ -10,8 +10,6 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-from model import SocialModel
-from olstm_model import OLSTMModel
 from vlstm_model import VLSTMModel
 
 
@@ -47,14 +45,9 @@ def get_model(index, arguments, infer=False):
     :param infer:
     :return:
     """
-    if index == 1:
-        return SocialModel(arguments, infer)
-    elif index == 2:
-        return OLSTMModel(arguments, infer)
-    elif index == 3:
+    if index == 3:
         return VLSTMModel(arguments, infer)
-    else:
-        return SocialModel(arguments, infer)
+
 
 
 def getCoef(outputs):
