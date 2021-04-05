@@ -103,7 +103,7 @@ class DataLoader:
         self.val_fraction = 0
 
         # Define the path in which the processed data would be stored
-        self.data_file_tr = os.path.join(self.train_data_dir, "trajectories_train.")
+        self.data_file_tr = os.path.join(self.train_data_dir, "trajectories_train.cpkl")
         self.data_file_te = os.path.join(self.base_test_path, "trajectories_test.cpkl")
         self.data_file_vl = os.path.join(self.val_data_dir, "trajectories_val.cpkl")
 
